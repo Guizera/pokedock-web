@@ -1,6 +1,6 @@
 # PokeDock — site
 
-Landing page em React, TypeScript e Vite, pronta para publicar pela Vercel a partir de um repositório próprio. O layout usa as cores, o visor e os sprites do app para macOS.
+Landing page em React, TypeScript e Vite, pronta para publicar pela Vercel a partir de um repositório próprio. O layout usa as cores, o visor e os sprites do PokeDock para macOS e Windows.
 
 O site está disponível em português e inglês. A primeira visita usa o idioma do navegador; os botões PT/EN no cabeçalho permitem trocar a qualquer momento e a escolha fica salva neste navegador. O título, a descrição, os textos de acessibilidade e a interface de consentimento acompanham o idioma.
 
@@ -26,7 +26,7 @@ O resultado está em `dist/`.
 
 O app Web do projeto Firebase `pokedock-3ca5c` já foi configurado com os dados fornecidos. Confirme que o Google Analytics está habilitado nesse projeto. O site usa as variáveis `VITE_FIREBASE_*` de `.env.local`.
 
-O SDK é carregado somente após o visitante aceitar analytics. O Firebase registra visitas à página; o site também registra `theme_preview` quando alguém troca o tema da prévia e `download_click` quando clica num link de DMG ativo. O visitante pode recusar ou mudar a escolha pelo rodapé. Sem as variáveis `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_PROJECT_ID` e `VITE_FIREBASE_MEASUREMENT_ID`, a coleta fica desligada.
+O SDK é carregado somente após o visitante aceitar analytics. O Firebase registra visitas à página; o site também registra `theme_preview` quando alguém troca o tema da prévia e `download_click` com a plataforma escolhida quando alguém clica num download ativo. O visitante pode recusar ou mudar a escolha pelo rodapé. Sem as variáveis `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_APP_ID`, `VITE_FIREBASE_PROJECT_ID` e `VITE_FIREBASE_MEASUREMENT_ID`, a coleta fica desligada.
 
 As configurações Web do Firebase são identificadores públicos no bundle do navegador, mesmo quando entram pelo ambiente de build. Não coloque chaves privadas ou credenciais administrativas em variáveis `VITE_*`.
 
@@ -35,10 +35,10 @@ As configurações Web do Firebase são identificadores públicos no bundle do n
 1. Envie **o conteúdo desta pasta** para o repositório GitHub separado do site.
 2. Importe esse repositório na Vercel. Use framework **Vite**, Node.js **24.x**, comando `npm run build` e pasta de saída `dist` (também declarados em `vercel.json`).
 3. Nas configurações do projeto Vercel, adicione as variáveis `VITE_FIREBASE_*` com os mesmos valores de `.env.local` para Production. Depois faça um novo deploy.
-4. Quando existir um DMG da versão atual, assinado e notarizado, defina `VITE_DOWNLOAD_URL` como a URL HTTPS do arquivo e faça novo deploy. Até lá, os botões informam “Download em breve”.
+4. Para macOS, defina `VITE_DOWNLOAD_URL` como a URL HTTPS do DMG assinado e notarizado. O download do Windows usa por padrão `https://github.com/Guizera/PokeDock-win/releases/latest/download/PokeDock.appinstaller`; `VITE_WINDOWS_DOWNLOAD_URL` pode sobrescrever esse canal quando necessário.
 
 ## Conteúdo e recursos
 
-O texto de instalação descreve o estado atual do aplicativo, incluindo o requisito de macOS 27 ou posterior. A barra é uma janela própria; ela pode ocultar automaticamente a Dock do macOS, sem substituí-la.
+O texto de instalação descreve os pacotes atuais: DMG para macOS 14 ou posterior e MSIX/App Installer para Windows 11 em x64 e ARM64. A barra é uma janela própria e não remove permanentemente a Dock nem a barra de tarefas do sistema.
 
 Sprites locais foram copiados dos assets do app, originalmente obtidos de [PokeAPI/sprites](https://github.com/PokeAPI/sprites). A atribuição à fonte não concede direitos sobre os personagens Pokémon; verifique as permissões de uso antes de publicar o site e o aplicativo.

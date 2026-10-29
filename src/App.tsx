@@ -40,8 +40,8 @@ const themes = [
 
 const questions = [
   {
-    question: 'O PokeDock substitui a Dock original do macOS?',
-    answer: 'O PokeDock cria uma barra própria, com temas, apps e widgets. Ao ativá-la, o app pode ligar a ocultação automática da Dock original. A Dock do macOS continua disponível ao levar o cursor até a borda da tela.',
+    question: 'O PokeDock substitui a Dock ou a barra de tarefas original?',
+    answer: 'O PokeDock cria uma barra própria, com temas, apps e widgets. A Dock do macOS e a barra de tarefas do Windows continuam disponíveis quando você precisar delas.',
   },
   {
     question: 'Preciso ficar com o app aberto?',
@@ -53,12 +53,21 @@ const questions = [
   },
   {
     question: 'Quais permissões o app pode pedir?',
-    answer: 'Ao personalizar a barra ou conectar players de música, o macOS pode solicitar acesso de Automação. Esses acessos são pedidos quando você usa as funções correspondentes.',
+    answer: 'No macOS, o sistema pode solicitar acesso de Automação ao conectar players de música. No Windows, a instalação confirma o pacote assinado. Esses acessos aparecem somente quando são necessários.',
+  },
+  {
+    question: 'Como funcionam as atualizações no Windows?',
+    answer: 'Depois da primeira instalação pelo arquivo PokeDock.appinstaller, o Windows consulta o canal oficial e instala versões mais recentes sem exigir um novo download manual.',
   },
 ]
 
-const downloadUrl = import.meta.env.VITE_DOWNLOAD_URL?.trim()
-const hasDownload = Boolean(downloadUrl?.startsWith('https://'))
+type DownloadPlatform = 'macos' | 'windows'
+
+const downloadUrls: Record<DownloadPlatform, string | undefined> = {
+  macos: import.meta.env.VITE_DOWNLOAD_URL?.trim(),
+  windows: import.meta.env.VITE_WINDOWS_DOWNLOAD_URL?.trim()
+    || 'https://github.com/Guizera/PokeDock-win/releases/latest/download/PokeDock.appinstaller',
+}
 
 function PokedexMark({ compact = false }: { compact?: boolean }) {
   return (
@@ -72,21 +81,29 @@ function PokedexMark({ compact = false }: { compact?: boolean }) {
   )
 }
 
-function DownloadLink({ className = '', source, t }: { className?: string; source: string; t: Translator }) {
+function DownloadLink({ platform, className = '', source, t }: { platform: DownloadPlatform; className?: string; source: string; t: Translator }) {
+  const downloadUrl = downloadUrls[platform]
+  const hasDownload = Boolean(downloadUrl?.startsWith('https://'))
+  const label = platform === 'macos' ? t('Baixar para macOS') : t('Baixar para Windows')
+  const unavailableLabel = platform === 'macos' ? t('macOS em breve') : t('Windows em breve')
+  const unavailableTitle = platform === 'macos'
+    ? t('O link do DMG ainda não foi configurado')
+    : t('O link do instalador do Windows ainda não foi configurado')
+
   if (!hasDownload) {
     return (
-      <span className={`download-link download-link--disabled ${className}`} aria-disabled="true" title={t('O link do DMG ainda não foi configurado')}>
-        <ArrowDownToLine size={19} aria-hidden="true" /> {t('Link de download em breve')}
+      <span className={`download-link download-link--disabled ${className}`} aria-disabled="true" title={unavailableTitle}>
+        <ArrowDownToLine size={19} aria-hidden="true" /> {unavailableLabel}
       </span>
     )
   }
   return (
     <a
-      className={`download-link ${className}`}
+      className={`download-link download-link--${platform} ${className}`}
       href={downloadUrl}
-      onClick={() => { void trackSiteEvent('download_click', { source }) }}
+      onClick={() => { void trackSiteEvent('download_click', { source, platform }) }}
     >
-      <ArrowDownToLine size={19} aria-hidden="true" /> {t('Baixar para macOS')} <ArrowRight size={18} aria-hidden="true" />
+      <ArrowDownToLine size={19} aria-hidden="true" /> {label} <ArrowRight size={18} aria-hidden="true" />
     </a>
   )
 }
@@ -160,10 +177,10 @@ function App() {
 
   useEffect(() => {
     document.documentElement.lang = language === 'pt' ? 'pt-BR' : 'en'
-    document.title = language === 'pt' ? 'PokeDock — uma aventura no seu Mac' : 'PokeDock — an adventure on your Mac'
+    document.title = language === 'pt' ? 'PokeDock — uma aventura no seu desktop' : 'PokeDock — an adventure on your desktop'
     const description = language === 'pt'
-      ? 'PokeDock traz encontros Pokémon, Pokédex e uma barra personalizada com temas e widgets para o seu Mac.'
-      : 'PokeDock brings Pokémon encounters, a Pokédex, and a custom bar with themes and widgets to your Mac.'
+      ? 'PokeDock traz encontros Pokémon, Pokédex e uma barra personalizada com temas e widgets para macOS e Windows.'
+      : 'PokeDock brings Pokémon encounters, a Pokédex, and a custom bar with themes and widgets to macOS and Windows.'
     document.querySelector('meta[name="description"]')?.setAttribute('content', description)
     document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title)
     document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
@@ -206,10 +223,10 @@ function App() {
           <div className="hero__layout container">
             <div className="hero__copy">
               <div className="eyebrow"><span className="eyebrow__dot" /> {t('UMA NOVA VIDA PARA O SEU DOCK')}</div>
-              <h1>{t('Seu Mac.')}<br /><em>{t('Sua aventura.')}</em></h1>
+              <h1>{t('Seu desktop.')}<br /><em>{t('Sua aventura.')}</em></h1>
               <p className="hero__lead">{t('Uma barra personalizada que traz encontros Pokémon para a sua rotina. Escolha um tema, organize seus apps e descubra quem apareceu enquanto você trabalha.')}</p>
-              <div className="hero__actions"><DownloadLink source="hero" t={t} /><a className="button button--outline" href="#como-funciona">{t('Como funciona')} <ArrowDown size={18} aria-hidden="true" /></a></div>
-              <div className="hero__meta"><span><Check size={15} aria-hidden="true" /> {t('151 Pokémon para encontrar')}</span><span><Check size={15} aria-hidden="true" /> {t('Feito para macOS')}</span></div>
+              <div className="hero__actions"><DownloadLink platform="macos" source="hero" t={t} /><DownloadLink platform="windows" source="hero" t={t} /><a className="button button--outline" href="#como-funciona">{t('Como funciona')} <ArrowDown size={18} aria-hidden="true" /></a></div>
+              <div className="hero__meta"><span><Check size={15} aria-hidden="true" /> {t('151 Pokémon para encontrar')}</span><span><Check size={15} aria-hidden="true" /> {t('Para macOS e Windows')}</span></div>
             </div>
             <div className="hero__visual"><div className="hero__floating-note">{t('UM ENCONTRO')}<br /><strong>{t('PODE ACONTECER')}<br />{t('A QUALQUER MOMENTO')}</strong></div><EncounterPreview t={t} /><div className="hero__sticker"><Sparkles size={17} aria-hidden="true" /> {t('PRÉVIA DO APP')}</div></div>
           </div>
@@ -218,7 +235,7 @@ function App() {
 
         <section className="section how" id="como-funciona">
           <div className="container">
-            <div className="section-heading"><span className="kicker">{t('01 / O JOGO COMEÇA NO SEU MAC')}</span><h2>{t('Um encontro muda')}<br /><em>{t('o dia inteiro.')}</em></h2><p>{t('O PokeDock transforma pequenos momentos de uso em uma caça que continua no seu ritmo.')}</p></div>
+            <div className="section-heading"><span className="kicker">{t('01 / O JOGO COMEÇA NO SEU DESKTOP')}</span><h2>{t('Um encontro muda')}<br /><em>{t('o dia inteiro.')}</em></h2><p>{t('O PokeDock transforma pequenos momentos de uso em uma caça que continua no seu ritmo.')}</p></div>
             <div className="step-grid">
               <article className="step-card"><span className="step-card__number">01</span><div className="step-card__art step-card__art--first"><img src="/pokemon/1.png" alt={t('Sprite de Bulbasaur')} /><span className="step-card__signal">!</span></div><h3>{t('Ele apareceu.')}</h3><p>{t('De tempos em tempos, um Pokémon surge no ícone do app. Você decide quando abrir o encontro.')}</p></article>
               <article className="step-card"><span className="step-card__number">02</span><div className="step-card__art step-card__art--second"><div className="step-card__ball"><span className="pokeball-dot" /></div><img src="/pokemon/25.png" alt={t('Sprite de Pikachu')} /></div><h3>{t('É hora de tentar.')}</h3><p>{t('Lance uma Pokébola ou fuja. Raridade e tentativas mudam suas chances; a primeira falha nunca faz o Pokémon fugir.')}</p></article>
@@ -239,14 +256,14 @@ function App() {
 
         <section className="section features" id="recursos"><div className="container features__layout"><div className="features__intro"><span className="kicker">{t('03 / MAIS DO QUE UMA BARRA BONITA')}</span><h2>{t('Do seu jeito.')}<br /><em>{t('No seu ritmo.')}</em></h2><p>{t('O PokeDock deixa as ferramentas de todos os dias à mão, com espaço para brincar quando der vontade.')}</p><a href="#instalacao" className="text-link">{t('Ver como instalar')} <ArrowRight size={18} aria-hidden="true" /></a></div><div className="features__grid"><div className="feature-tile"><Clock3 size={25} aria-hidden="true" /><h3>{t('Encontros sob controle')}</h3><p>{t('Escolha a frequência e pause as aparições durante trabalho ou apresentações.')}</p></div><div className="feature-tile"><Music2 size={25} aria-hidden="true" /><h3>{t('Música por perto')}</h3><p>{t('Widgets para Spotify e Música mostram a faixa e oferecem controles quando conectados.')}</p></div><div className="feature-tile"><NotebookTabs size={25} aria-hidden="true" /><h3>{t('Pequenas ferramentas')}</h3><p>{t('Relógio, tarefas, notas, foco, orçamento e cotação do dólar na mesma barra.')}</p></div><div className="feature-tile"><Folder size={25} aria-hidden="true" /><h3>{t('Seus apps, sempre à mão')}</h3><p>{t('Adicione e organize aplicativos. Finder e Lixeira já vêm na configuração inicial.')}</p></div></div></div></section>
 
-        <section className="section install" id="instalacao"><div className="container install__layout"><div className="install__copy"><span className="kicker">{t('04 / PRONTO PARA O SEU MAC?')}</span><h2>{t('Instalar é')}<br /><em>{t('simples assim.')}</em></h2><p>{t('O PokeDock é distribuído em um DMG assinado e notarizado.')}</p><DownloadLink source="installation" t={t} /><p className="install__requirement"><ShieldCheck size={17} aria-hidden="true" /> {t('Requer macOS 14 ou posterior. Compatível com Macs Intel e Apple Silicon.')}</p></div><div className="install__steps"><div><span>01</span><p><strong>{t('Baixe o DMG.')}</strong><br />{t('Salve o instalador pelo botão desta página.')}</p></div><div><span>02</span><p><strong>{t('Arraste para Aplicativos.')}</strong><br />{t('Abra o DMG e mova o aplicativo para a pasta Aplicativos.')}</p></div><div><span>03</span><p><strong>{t('Escolha o seu tema.')}</strong><br />{t('Abra a Pokédex, personalize a barra e comece a explorar.')}</p></div></div></div></section>
+        <section className="section install" id="instalacao"><div className="container"><div className="section-heading section-heading--center"><span className="kicker">{t('04 / ESCOLHA SUA PLATAFORMA')}</span><h2>{t('Instalar é')}<br /><em>{t('simples assim.')}</em></h2><p>{t('Downloads oficiais, assinados e preparados para receber atualizações.')}</p></div><div className="install__platforms"><article className="install-card"><div className="install-card__header"><span className="install-card__platform">macOS</span><ShieldCheck size={22} aria-hidden="true" /></div><h3>{t('Para o seu Mac')}</h3><p>{t('DMG assinado e notarizado para Macs Intel e Apple Silicon.')}</p><DownloadLink platform="macos" source="installation" t={t} /><p className="install__requirement">{t('Requer macOS 14 ou posterior.')}</p><ol><li><span>01</span><p><strong>{t('Baixe o DMG.')}</strong><br />{t('Salve o instalador pelo botão desta página.')}</p></li><li><span>02</span><p><strong>{t('Arraste para Aplicativos.')}</strong><br />{t('Abra o DMG e mova o aplicativo para a pasta Aplicativos.')}</p></li><li><span>03</span><p><strong>{t('Escolha o seu tema.')}</strong><br />{t('Abra a Pokédex, personalize a barra e comece a explorar.')}</p></li></ol></article><article className="install-card install-card--windows"><div className="install-card__header"><span className="install-card__platform">Windows</span><span className="install-card__new">{t('NOVO')}</span></div><h3>{t('Para o seu PC')}</h3><p>{t('Pacote MSIX assinado, com atualizações automáticas pelo canal oficial.')}</p><DownloadLink platform="windows" source="installation" t={t} /><p className="install__requirement">{t('Requer Windows 11. Compatível com PCs x64 e ARM64.')}</p><ol><li><span>01</span><p><strong>{t('Baixe o instalador.')}</strong><br />{t('Abra o arquivo PokeDock.appinstaller baixado.')}</p></li><li><span>02</span><p><strong>{t('Confirme a instalação.')}</strong><br />{t('O Windows verificará a assinatura digital antes de instalar.')}</p></li><li><span>03</span><p><strong>{t('Receba as atualizações.')}</strong><br />{t('As próximas versões serão instaladas pelo mesmo canal, sem novo download manual.')}</p></li></ol></article></div></div></section>
 
         <section className="section faq" id="faq"><div className="container faq__layout"><div className="section-heading"><span className="kicker">{t('AINDA TEM DÚVIDAS?')}</span><h2>{t('Manual de')}<br /><em>{t('treinador.')}</em></h2><p>{t('Algumas respostas antes de começar sua coleção.')}</p></div><div className="faq__list">{questions.map((item, index) => <div className={`faq-item${openQuestion === index ? ' faq-item--open' : ''}`} key={item.question}><button type="button" aria-expanded={openQuestion === index} onClick={() => setOpenQuestion(openQuestion === index ? null : index)}><CircleHelp size={19} aria-hidden="true" />{t(item.question)}<ChevronDown size={20} aria-hidden="true" /></button>{openQuestion === index && <p>{t(item.answer)}</p>}</div>)}</div></div></section>
 
-        <section className="about" id="sobre"><div className="container about__layout"><div className="about__mark"><PokedexMark /></div><div><span className="kicker">{t('UM PROJETO FEITO COM CARINHO')}</span><h2>{t('Do Mac para a')}<br /><em>{t('aventura.')}</em></h2><p>{t('O PokeDock foi desenvolvido por')} <strong>Guilherme Cunha</strong>{t(', unindo a personalização do macOS ao prazer de descobrir e colecionar. É um projeto independente, criado para deixar a rotina mais divertida.')}</p></div></div></section>
+        <section className="about" id="sobre"><div className="container about__layout"><div className="about__mark"><PokedexMark /></div><div><span className="kicker">{t('UM PROJETO FEITO COM CARINHO')}</span><h2>{t('Do desktop para a')}<br /><em>{t('aventura.')}</em></h2><p>{t('O PokeDock foi desenvolvido por')} <strong>Guilherme Cunha</strong>{t(', unindo personalização ao prazer de descobrir e colecionar. É um projeto independente, criado para deixar a rotina mais divertida.')}</p></div></div></section>
       </main>
 
-      <footer className="site-footer"><div className="container site-footer__main"><div><a className="brand" href="#inicio"><PokedexMark compact /><span>POKEDOCK<small>{t('DOCK + AVENTURA')}</small></span></a><p>{t('Um pouco mais de aventura em cada dia no Mac.')}</p></div><div className="site-footer__links"><a href="#como-funciona">{t('Como funciona')}</a><a href="#temas">{t('Temas')}</a><a href="#instalacao">{t('Instalação')}</a><a href="#faq">{t('Dúvidas')}</a></div></div><div className="container site-footer__bottom"><p>© {new Date().getFullYear()} PokeDock {t('· Desenvolvido por Guilherme Cunha.')}</p><p>{t('Projeto independente, sem afiliação com Nintendo, Game Freak ou The Pokémon Company. Sprites: PokeAPI.')}</p>{analyticsConfigured && <button type="button" onClick={() => setConsent(null)}>{t('Preferências de analytics')}</button>}</div></footer>
+      <footer className="site-footer"><div className="container site-footer__main"><div><a className="brand" href="#inicio"><PokedexMark compact /><span>POKEDOCK<small>{t('DOCK + AVENTURA')}</small></span></a><p>{t('Um pouco mais de aventura em cada dia no seu desktop.')}</p></div><div className="site-footer__links"><a href="#como-funciona">{t('Como funciona')}</a><a href="#temas">{t('Temas')}</a><a href="#instalacao">{t('Instalação')}</a><a href="#faq">{t('Dúvidas')}</a></div></div><div className="container site-footer__bottom"><p>© {new Date().getFullYear()} PokeDock {t('· Desenvolvido por Guilherme Cunha.')}</p><p>{t('Projeto independente, sem afiliação com Nintendo, Game Freak ou The Pokémon Company. Sprites: PokeAPI.')}</p>{analyticsConfigured && <button type="button" onClick={() => setConsent(null)}>{t('Preferências de analytics')}</button>}</div></footer>
       {analyticsConfigured && consent === null && <ConsentBanner onChoice={chooseConsent} t={t} />}
     </>
   )
