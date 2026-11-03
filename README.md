@@ -39,6 +39,6 @@ As configurações Web do Firebase são identificadores públicos no bundle do n
 
 ## Conteúdo e recursos
 
-O texto de instalação descreve os pacotes atuais: DMG para macOS 14 ou posterior e MSIX/App Installer para Windows 11 em x64 e ARM64. A barra é uma janela própria e não remove permanentemente a Dock nem a barra de tarefas do sistema.
+O texto de instalação descreve os pacotes atuais: DMG para macOS 14 ou posterior e MSIX/App Installer para Windows 10 versão 1809 ou posterior em x64 e ARM64. A barra é uma janela própria e não remove permanentemente a Dock nem a barra de tarefas do sistema.
 
 Sprites locais foram copiados dos assets do app, originalmente obtidos de [PokeAPI/sprites](https://github.com/PokeAPI/sprites). A atribuição à fonte não concede direitos sobre os personagens Pokémon; verifique as permissões de uso antes de publicar o site e o aplicativo.

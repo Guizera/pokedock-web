@@ -125,7 +125,7 @@ const english: Record<string, string> = {
   'NOVO': 'NEW',
   'Para o seu PC': 'For your PC',
   'Pacote MSIX assinado, com atualizações automáticas pelo canal oficial.': 'Signed MSIX package with automatic updates through the official channel.',
-  'Requer Windows 11. Compatível com PCs x64 e ARM64.': 'Requires Windows 11. Compatible with x64 and ARM64 PCs.',
+  'Requer Windows 10 versão 1809 ou posterior. Compatível com PCs x64 e ARM64.': 'Requires Windows 10 version 1809 or later. Compatible with x64 and ARM64 PCs.',
   'Baixe o instalador.': 'Download the installer.',
   'Abra o arquivo PokeDock.appinstaller baixado.': 'Open the downloaded PokeDock.appinstaller file.',
   'Confirme a instalação.': 'Confirm installation.',
