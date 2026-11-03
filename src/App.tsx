@@ -177,13 +177,15 @@ function App() {
 
   useEffect(() => {
     document.documentElement.lang = language === 'pt' ? 'pt-BR' : 'en'
-    document.title = language === 'pt' ? 'PokeDock — uma aventura no seu desktop' : 'PokeDock — an adventure on your desktop'
+    document.title = language === 'pt' ? 'PokeDock — uma aventura no Windows e macOS' : 'PokeDock — an adventure on Windows and macOS'
     const description = language === 'pt'
-      ? 'PokeDock traz encontros Pokémon, Pokédex e uma barra personalizada com temas e widgets para macOS e Windows.'
-      : 'PokeDock brings Pokémon encounters, a Pokédex, and a custom bar with themes and widgets to macOS and Windows.'
+      ? 'PokeDock traz encontros Pokémon, Pokédex e uma barra personalizada com temas e widgets para Windows e macOS.'
+      : 'PokeDock brings Pokémon encounters, a Pokédex, and a custom bar with themes and widgets to Windows and macOS.'
     document.querySelector('meta[name="description"]')?.setAttribute('content', description)
     document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title)
     document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
+    document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', document.title)
+    document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', description)
     try { window.localStorage.setItem('pokedock.language.v1', language) } catch { /* Storage is optional. */ }
   }, [language])
 
